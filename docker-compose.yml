@@ -1,0 +1,39 @@
+version: '3.7'
+services:
+
+    mysql:
+        image: mysql:5.6
+        restart: on-failure:5
+        networks:
+            app:
+                ipv4_address: 172.18.0.9
+        env_file:
+            - environment.env
+        volumes:
+            - './data/snipe_mysql_data:/var/lib/mysql'
+
+    snipeit:
+        image: snipe/snipe-it:latest
+        restart: on-failure:3
+        depends_on:
+            - mysql
+        networks: 
+            app:
+                ipv4_address: 172.18.0.8
+        links:
+            - mysql
+        ports:
+            - "8001:80"
+            - "8002:443"
+        env_file:
+            - environment.env
+        volumes:
+            - './data/snipe_it_data:/var/lib/snipeit'
+
+networks:
+    app:
+        driver: bridge
+        ipam:
+            driver: default
+            config:
+            - subnet: 172.18.0.0/24
